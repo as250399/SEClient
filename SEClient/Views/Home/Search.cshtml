@@ -1,0 +1,179 @@
+﻿@Styles.Render("~/Content/css")
+@Scripts.Render("~/bundles/jquery")
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#datetimepicker1').datetimepicker();
+        $('#datetimepicker2').datetimepicker();
+
+        $("#search").click(function () {
+            console.log("In button click");
+            $.ajax({
+                type: "Post",
+                url: '@Url.Action("LoadData", "Home")',
+                data: $('#msformsearch').serialize(),
+                dataType: "json",
+                success: function (response) {
+
+                    $("#tablecontainer").show();
+
+                    $("#resultGrid").dataTable(
+                        {
+                            blengthchange: true,
+                            lengthmenu: [[5, 10, -1], [5, 10, "all"]],
+                            bfilter: true,
+                            bsort: true,
+                            bpaginate: true,
+                            data: response,
+                            columns: [{ 'data': 'SearchType' },
+                            { 'data': 'GroupFiledId' },
+                            { 'data': 'GroupValue' },
+                            { 'data': 'SearchType' },
+                            { 'data': 'TotalHits' }]
+                    });
+                },
+                failure: function (response) {
+                    alert(response.d);
+                },
+                error: function (response) {
+                    alert(response.d);
+                }
+            });
+        });
+
+        $.ajax({
+            type: "GET",
+            url: "/Home/GetCategory",
+            data: "{}",
+            success: function (data) {
+                var s = '<option value="-1">Please Select a Category</option>';
+                for (var i = 0; i < data.length; i++) {
+                    s += '<option value="' + data[i].CategoryCode + '">' + data[i].CategoryName + '</option>';
+                }
+                $("#CategoryList").html(s);
+            }
+        });
+
+        $("#CategoryList").on("change", function () {
+
+            $.ajax({
+                type: "GET",
+                url: "/Home/GetProfiles?value=" + $(this).val(),
+                data: "{}",
+                success: function (data) {
+                    var s = '<option value="-1">Please Select a Profile</option>';
+                    for (var i = 0; i < data.length; i++) {
+                        s += '<option value="' + data[i].TagIndex + '">' + data[i].ProfileName + '</option>';
+                    }
+                    $("#ProfileList").html(s);
+                }
+            });
+        })
+
+        $.ajax({
+            type: "GET",
+            url: "/Home/GetBusinessUnits",
+            data: "{}",
+            success: function (data) {
+                var s = '<option value="-1">Please Select a Business Unit</option>';
+                for (var i = 0; i < data.length; i++) {
+                    s += '<option value="' + data[i].BusinessUnitId + '">' + data[i].BusinessUnitId + '</option>';
+                }
+                $("#BUList").html(s);
+            }
+        });
+
+    });
+</script>
+
+<h1>Search the indexes</h1>
+
+@using (Html.BeginForm("Search", "Home", FormMethod.Post, new { id = "msformsearch", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <section class="search-sec">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-3 col-sm-12 p-0">
+                                <select id="CategoryList" name="CategoryList" class="form-control search-slt">
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-12 p-0">
+                                <select id="ProfileList" name="ProfileList" class="form-control search-slt">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="row">
+                            <div class="col-lg-3 col-md-3 col-sm-12 p-0">
+                                <select id="BUList" name="BUList" class="form-control search-slt">
+                                </select>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-12 p-0">
+                                <input type="text" id="barcode" name="barcode" placeholder="Insert Item Barcode" class="form-control search-slt" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br />
+                <div class="row">
+                    <div class='col-sm-3'>
+                        <div class="form-group">
+                            <div id="filterDate2">
+                                <!-- Datepicker as text field -->
+                                <div class="input-group date" data-date-format="dd.mm.yyyy" id="datetimepicker1">
+                                    <input type="text" name="startdate" class="form-control" placeholder="Start Date">
+                                    <div class="input-group-addon">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='col-sm-3'>
+                        <div class="form-group">
+                            <div id="filterDate2">
+                                <!-- Datepicker as text field -->
+                                <div class="input-group date" data-date-format="dd.mm.yyyy" id="datetimepicker2">
+                                    <input type="text" name="enddate" class="form-control" placeholder="End Date">
+                                    <div class="input-group-addon">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" id="search" class="btn btn-success cent">Search</button>
+            </div>
+        </section>
+
+        <div class="container">
+            <br />
+            <div class="panel" id="tablecontainer" style="width:90%; display:none; margin:0 auto;">
+                <table id="resultGrid" class="table table-striped table-bordered dt-responsive nowrap" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>GroupFieldId</th>
+                            <th>GroupValue</th>
+                            <th>SearchType</th>
+                            <th>TotalHits</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+

@@ -1,0 +1,62 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@Styles.Render("~/Content/css")
+@Scripts.Render("~/bundles/jquery")
+
+<h2>Index a file using db</h2>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#IndexFromDB").click(function () {
+            var form = $("#msform");
+            $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("IndexByDB", "Home")',
+                    data: $('#msform').serialize(),
+                    success: function (result) {
+                        if (result.Result == "Success") {
+                        }
+                    },
+                    error: function (data) {
+                        alert(data);
+                    }
+            });
+        });
+
+        $("#IndexOnFly").click(function () {
+            var form = $("#msform");
+            $.ajax({
+                    type: 'POST',
+                    traditional: true,
+                    url: '@Url.Action("IndexOnFly", "Home")',
+                    data: $('#msform').serialize(),
+                    success: function (result) {
+                        if (result.Result == "Success") {
+                        }
+                    },
+                    error: function (data) {
+                        alert(data);
+                    }
+            });
+        });
+
+    });
+</script>
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new { id = "msform", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    
+    <br />
+    <button type="submit" id="IndexFromDB" name="IndexFromDB" class="btn btn-success">Start Indexing from database</button>
+    <button type="submit" id="IndexOnFly" name="IndexOnFly" class="btn btn-success">Start Indexing On the Fly</button>
+}
+
+@*<form id="login" method="POST" action="~/Home/Index">
+    </form>*@
+
+
